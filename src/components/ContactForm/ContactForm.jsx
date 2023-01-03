@@ -6,10 +6,10 @@ import {
   LabelStyled,
   ButtonStyled,
 } from './ContactForm.styled';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { addContact } from 'redux/itemsSlice/contactsSlice';
-
-
+import { nanoid } from 'nanoid';
+import { getContacts } from 'redux/selectors';
 
 const initialValue = {
   name: '',
@@ -30,10 +30,24 @@ let schema = yup.object().shape({
 });
 
 export const ContactForm = () => {
+  const { contactsList } = useSelector(getContacts);
   const dispatch = useDispatch();
   const handleSubmit = (value, { resetForm }) => {
-    console.log(value);
-    dispatch(addContact(value));
+    let isName = false;
+    if (contactsList && contactsList.length > 0) {
+      contactsList.forEach(({ name }) => {
+        if (value.name.toLowerCase() === name.toLowerCase()) {
+          alert(`${value.name} is already in contacts`);
+          isName = true;
+        }
+      });
+    }
+
+    if (!isName) {
+      value.id = nanoid();
+      dispatch(addContact(value));
+    }
+
     resetForm();
   };
 
